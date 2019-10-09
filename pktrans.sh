@@ -71,16 +71,18 @@ do
     timestamp=`date +%s`
     current=$(((timestamp/60)%PERIOD))
     # dt=$((PIVOT-minute%PIVOT+delta))
-    dt=$(((PERIOD+START-current)%PERIOD))
+    dt=$(((PERIOD+START-current)%PERIOD))+delta
     if [ $dt -gt 0 ]; then
         log "Sleep for ${dt} min"
         sleep ${dt}m
     fi
-    log "Excute: $cmd"
-    STIME=`date +%s`
-    bash -c "$cmd"
-    ETIME=`date +%s`
-    DTIME=$((TIMEOUT-(ETIME-STIME)/60))
+    for i in `seq 2`; do
+        log "Excute: $cmd"
+        STIME=`date +%s`
+        bash -c "$cmd"
+        ETIME=`date +%s`
+        DTIME=$((TIMEOUT-(ETIME-STIME)/60))
+        if [ $DTIME -ge 1 ]; then break; else [ $i -eq 2 ] || log 'Retry'; fi
     if [ $DTIME -gt 0 ]; then
         log "Waiting for $DTIME min"
         sleep ${DTIME}m
