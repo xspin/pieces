@@ -15,6 +15,7 @@ printf """Usage: $pn [OPTION] [IP] PORT
   -d\t [default 200] data size to transfer (unit is 10MB).
   -t\t [default 40] transfer timeout (minutes).
   -p\t [default 60] time pivot (1~60).
+  -o\t [default /dev/null] store data to FILE
 Example:
     Sender: $pn Local_Port
     Reciver: $pn Remote_IP Remote_Port
@@ -24,19 +25,21 @@ Example:
 DATASIZE=200 #x10MB
 TIMEOUT=40 #min
 PIVOT=60 # 1~60 min
+FILE='/dev/null'
 
-while getopts 'hd:t:p:' OPT; do
+while getopts 'hd:t:p:o:' OPT; do
     case $OPT in
         h) usage; exit;;
         d) DATASIZE="$OPTARG";;
         t) TIMEOUT="$OPTARG";;
         p) PIVOT="$OPTARG";;
+        o) FILE="$OPTARG";;
         ?) usage; exit;;
     esac
 done
 shift $(($OPTIND - 1))
 
-log "DATASIZE: $((DATASIZE*10))MB, TIMEOUT: ${TIMEOUT}min, PIVOT: ${PIVOT}min, Args: $*"
+log "DATASIZE: $((DATASIZE*10))MB, TIMEOUT: ${TIMEOUT}min, PIVOT: ${PIVOT}min, FILE:${FILE}, Args: $*"
 
 dd_cmd="dd if=/dev/urandom bs=10485760 count=$DATASIZE"
 
@@ -48,7 +51,7 @@ else
     IP=$1
     PORT=$2
     # cmd="timeout ${TIMEOUT}m nc $IP $PORT > /tmp/pktrans_recv.data"
-    cmd="timeout ${TIMEOUT}m wget $IP:$PORT -q -O /dev/null"
+    cmd="timeout ${TIMEOUT}m wget $IP:$PORT -q -O $FILE"
     delta=1
 fi
 
