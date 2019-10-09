@@ -4,7 +4,7 @@ kill_all() {
     for pid in `printf "$PSDATA" | awk '{print $2}'`
     do
         echo "kill Pid $pid"
-        kill $pid && kill -9 $pid
+        kill $pid || kill -9 $pid
     done
 }
 
