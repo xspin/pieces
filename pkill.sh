@@ -6,7 +6,15 @@ kill_all() {
         echo "kill Pid $pid"
         kill $pid || kill -9 $pid
     done
+    PSDATA=`ps aux | grep "$PROG" | grep -v grep | grep -v kill`
+    if [ ! -z "$PSDATA" ]; then
+    echo '------------------------------------------'
+        printf "$PSDATA" | grep --color=auto "$PROG" 
+    fi
+
 }
+
+PROG=$1
 
 if [ -z "$1" ]; then echo "Usage: kill.sh [Program_Name]"; exit; fi
 
