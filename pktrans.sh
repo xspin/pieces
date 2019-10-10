@@ -1,4 +1,5 @@
 #!/bin/bash
+# Ver 0.1.0
 
 log() {
     echo `date +[%Y-%m-%d_%H:%M:%S]` $*
@@ -11,19 +12,22 @@ exitimer() {
 usage() {
 pn=`basename $0`
 printf """Usage: $pn [OPTION] [IP] PORT 
+Periodically send/receive data to/from a host.
+
   -h\t print this help.
-  -d\t [default 200] data size to transfer (unit is 10MB).
+  -d\t [default 200] data size to transfer (MB).
   -t\t [default 40] transfer timeout (minutes).
   -p\t [default 60] period (minutes)
   -s\t [default 0] start time (0~PERIOD).
   -o\t [default /dev/null] store data to FILE
+
 Example:
     Sender: $pn Local_Port
     Reciver: $pn Remote_IP Remote_Port
 """
 }
 
-DATASIZE=200 #x10MB
+DATASIZE=200 #MB
 TIMEOUT=40 #min
 PERIOD=60 # 1~60 min
 START=0
@@ -43,7 +47,7 @@ done
 shift $(($OPTIND - 1))
 
 
-dd_cmd="dd if=/dev/urandom bs=10485760 count=$DATASIZE"
+dd_cmd="dd if=/dev/urandom bs=10M count=$((DATASIZE/10))"
 
 if [ -z "$2" ]; then
     PORT=$1
@@ -54,22 +58,23 @@ else
     IP=$1
     PORT=$2
     # cmd="timeout ${TIMEOUT}m nc $IP $PORT > /tmp/pktrans_recv.data"
-    cmd="timeout ${TIMEOUT}m wget $IP:$PORT -q -O $FILE"
+    cmd="timeout ${TIMEOUT}m wget $IP:$PORT -q -O $FILE &>/dev/null"
     delta=1
-    FILE="$FILE, "
+    FILE="OUTPUT: $FILE, "
 fi
 
-log "DATASIZE: $((DATASIZE*10))MB, TIMEOUT: ${TIMEOUT}min, PERIOD: ${PERIOD}min, START: ${START}min, ${FILE}Args: $*"
 
 if [ -z "$PORT" ]; then
+    echo "`basename $0`: missing operand"
     usage
     exit
 fi
 
+log "DATASIZE: $((DATASIZE))MB, TIMEOUT: ${TIMEOUT}min, PERIOD: ${PERIOD}min, START: ${START}min, ${FILE}Args: $*"
+
 while true; do 
     timestamp=`date +%s`
     current=$(( (timestamp/60)%PERIOD ))
-    # dt=$((PIVOT-minute%PIVOT+delta))
     dt=$(( (PERIOD+START-current)%PERIOD+delta ))
     if [ $dt -gt 0 ]; then
         log "Sleep for ${dt} min"
