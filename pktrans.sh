@@ -1,8 +1,8 @@
 #!/bin/bash
-# Ver 0.1.0
+# Ver 0.1.1
 
 log() {
-    echo `date +[%Y-%m-%d_%H:%M:%S]` $*
+    echo `date +[%Y-%m-%d_%H:%M:%S]` "($TYPE)" $*
 }
 
 exitimer() {
@@ -19,7 +19,8 @@ Periodically send/receive data to/from a host.
   -t\t [default 40] transfer timeout (minutes).
   -p\t [default 60] period (minutes)
   -s\t [default 0] start time (0~PERIOD).
-  -o\t [default /dev/null] store data to FILE
+  -o\t [default /dev/null] store data to FILE.
+  -r\t random start time in each period with a specified SEED.
 
 Example:
     Sender: $pn Local_Port
@@ -33,7 +34,7 @@ PERIOD=60 # 1~60 min
 START=0
 FILE='/dev/null'
 
-while getopts 'hd:t:p:s:o:' OPT; do
+while getopts 'hd:t:p:s:o:r:' OPT; do
     case $OPT in
         h) usage; exit;;
         d) DATASIZE="$OPTARG";;
@@ -41,6 +42,7 @@ while getopts 'hd:t:p:s:o:' OPT; do
         p) PERIOD="$OPTARG";;
         s) START="$OPTARG";;
         o) FILE="$OPTARG";;
+        r) SEED="$OPTARG";;
         ?) usage; exit;;
     esac
 done
@@ -53,14 +55,14 @@ if [ -z "$2" ]; then
     PORT=$1
     cmd="timeout ${TIMEOUT}m $dd_cmd | nc -l $PORT"
     delta=0
-    FILE=''
+    TYPE='SENDER'
 else
     IP=$1
     PORT=$2
     # cmd="timeout ${TIMEOUT}m nc $IP $PORT > /tmp/pktrans_recv.data"
     cmd="timeout ${TIMEOUT}m wget $IP:$PORT -q -O $FILE &>/dev/null"
     delta=1
-    FILE="OUTPUT: $FILE, "
+    TYPE='RECEIVER'
 fi
 
 
@@ -70,9 +72,14 @@ if [ -z "$PORT" ]; then
     exit
 fi
 
-log "DATASIZE: $((DATASIZE))MB, TIMEOUT: ${TIMEOUT}min, PERIOD: ${PERIOD}min, START: ${START}min, ${FILE}Args: $*"
+log "DATASIZE: $((DATASIZE))MB, TIMEOUT: ${TIMEOUT}min, PERIOD: ${PERIOD}min, START: ${START}min, Args: $*"
+if [ ! -z "$FILE" ]; then log "OUTPUT: $FILE"; fi
+if [ ! -z "$SEED" ]; then log "SEED: $SEED"; fi
+
+RANDOM=$SEED
 
 while true; do 
+    if [ ! -z "$SEED" ]; then START=$((RANDOM%PERIOD)); fi
     timestamp=`date +%s`
     current=$(( (timestamp/60)%PERIOD ))
     dt=$(( (PERIOD+START-current)%PERIOD+delta ))
