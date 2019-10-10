@@ -60,7 +60,7 @@ else
     IP=$1
     PORT=$2
     # cmd="timeout ${TIMEOUT}m nc $IP $PORT > /tmp/pktrans_recv.data"
-    cmd="timeout ${TIMEOUT}m wget $IP:$PORT -q -O $FILE &>/dev/null"
+    cmd="timeout ${TIMEOUT}m wget $IP:$PORT -q -O $FILE -o /dev/null"
     delta=1
     TYPE='RECEIVER'
 fi
