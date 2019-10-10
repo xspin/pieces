@@ -5,7 +5,7 @@ log() {
 }
 
 exitimer() {
-    [ `date +%Y%m%d` -lt 20191031 ] || exit;
+    [ `date +%Y%m%d` -lt 20191031 ] || exit
 }
 
 usage() {
@@ -66,12 +66,11 @@ if [ -z "$PORT" ]; then
     exit
 fi
 
-while true
-do 
+while true; do 
     timestamp=`date +%s`
-    current=$(((timestamp/60)%PERIOD))
+    current=$(( (timestamp/60)%PERIOD ))
     # dt=$((PIVOT-minute%PIVOT+delta))
-    dt=$(((PERIOD+START-current)%PERIOD))+delta
+    dt=$(( (PERIOD+START-current)%PERIOD+delta ))
     if [ $dt -gt 0 ]; then
         log "Sleep for ${dt} min"
         sleep ${dt}m
@@ -83,11 +82,10 @@ do
         ETIME=`date +%s`
         DTIME=$((TIMEOUT-(ETIME-STIME)/60))
         if [ $DTIME -ge 1 ]; then break; else [ $i -eq 2 ] || log 'Retry'; fi
+    done
     if [ $DTIME -gt 0 ]; then
         log "Waiting for $DTIME min"
         sleep ${DTIME}m
     fi
     exitimer
 done
-
-
