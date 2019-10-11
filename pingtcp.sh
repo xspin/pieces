@@ -35,7 +35,10 @@ elif [ -z "$FLAG" ]; then
     echo 'Run in background ...'
     # echo "Save data to $OUTPUT"
     # echo "Excute: $0 -f $ARGS"
-    nohup bash -c "$0 -f $ARGS" &>/dev/null &
+    LOGFILE='/tmp/pingtcp.log'
+    echo "Redirect output to $LOGFILE"
+    nohup bash -c "$0 -f $ARGS" &>$LOGFILE &
+    tail $LOGFILE
     exit
 fi
 
