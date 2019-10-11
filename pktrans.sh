@@ -15,11 +15,11 @@ printf """Usage: $pn [OPTION] [IP] PORT
 Periodically send/receive data to/from a host.
 
   -h\t print this help.
-  -d\t [default 200] data size to transfer (MB).
-  -t\t [default 40] transfer timeout (minutes).
-  -p\t [default 60] period (minutes)
-  -s\t [default 0] start time (0~PERIOD).
-  -o\t [default /dev/null] store data to FILE.
+  -d\t data size to transfer (MB) [default 200].
+  -t\t transfer timeout (minutes) [default 40].
+  -p\t period (minutes) [default 60].
+  -s\t start time (0~PERIOD) [default 0].
+  -o\t store data to FILE [default /dev/null].
   -r\t random start time in each period with a specified SEED.
   -v\t version.
 
