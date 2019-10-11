@@ -1,5 +1,5 @@
 #!/bin/bash
-# Ver 0.1.2
+VER=0.1.3
 
 log() {
     echo `date +[%Y-%m-%d_%H:%M:%S]` "($TYPE)" $*
@@ -21,6 +21,7 @@ Periodically send/receive data to/from a host.
   -s\t [default 0] start time (0~PERIOD).
   -o\t [default /dev/null] store data to FILE.
   -r\t random start time in each period with a specified SEED.
+  -v\t version.
 
 Example:
     Sender: $pn Local_Port
@@ -34,7 +35,7 @@ PERIOD=60 # 1~60 min
 START=0
 FILE='/dev/null'
 
-while getopts 'hd:t:p:s:o:r:' OPT; do
+while getopts 'hd:t:p:s:o:r:v' OPT; do
     case $OPT in
         h) usage; exit;;
         d) DATASIZE="$OPTARG";;
@@ -43,6 +44,7 @@ while getopts 'hd:t:p:s:o:r:' OPT; do
         s) START="$OPTARG";;
         o) FILE="$OPTARG";;
         r) SEED="$OPTARG";;
+        v) echo "$VER"; exit;;
         ?) usage; exit;;
     esac
 done
@@ -93,9 +95,10 @@ while true; do
         log "Excute: $cmd"
         bash -c "$cmd"
         ETIME=`date +%s`
-        DTIME=$((TIMEOUT-(ETIME-STIME)/60))
-        if [ $DTIME -gt 0 ]; then break; else [ $i -eq 2 ] || log 'Retry'; fi
+        if [ $((ETIME-STIME)) -gt 30 ]; then break; else [ $i -eq 2 ] || log 'Retry'; sleep 3; fi
     done
+    ETIME=`date +%s`
+    DTIME=$((TIMEOUT-(ETIME-STIME)/60))
     if [ $DTIME -gt 0 ]; then
         log "Waiting for $DTIME min"
         sleep ${DTIME}m
