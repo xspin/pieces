@@ -1,5 +1,5 @@
 #!/bin/bash
-# Ver 0.1.1
+# Ver 0.1.2
 
 log() {
     echo `date +[%Y-%m-%d_%H:%M:%S]` "($TYPE)" $*
@@ -80,6 +80,7 @@ RANDOM=$SEED
 
 while true; do 
     if [ ! -z "$SEED" ]; then START=$((RANDOM%PERIOD)); fi
+    log "START: $START"
     timestamp=`date +%s`
     current=$(( (timestamp/60)%PERIOD ))
     dt=$(( (PERIOD+START-current)%PERIOD+delta ))
@@ -87,13 +88,13 @@ while true; do
         log "Sleep for ${dt} min"
         sleep ${dt}m
     fi
+    STIME=`date +%s`
     for i in `seq 2`; do
         log "Excute: $cmd"
-        STIME=`date +%s`
         bash -c "$cmd"
         ETIME=`date +%s`
         DTIME=$((TIMEOUT-(ETIME-STIME)/60))
-        if [ $DTIME -ge 1 ]; then break; else [ $i -eq 2 ] || log 'Retry'; fi
+        if [ $DTIME -gt 0 ]; then break; else [ $i -eq 2 ] || log 'Retry'; fi
     done
     if [ $DTIME -gt 0 ]; then
         log "Waiting for $DTIME min"
