@@ -103,8 +103,9 @@ def main():
                 #         tm.append(int(child.find(tag).text))
                 #     data['when'] = '%d%02d%02d%02d%02d%02d'%tuple(tm)
             if data['protocol'] not in ['tcp', 'udp']: continue
-            if '127.0.0.1' in data['out_link']: continue
-            if '127.0.0.1' in data['in_link']: continue
+            for s in ['127.0.0', '65534']:
+                if s in data['out_link']: continue
+                if s in data['in_link']: continue
             print(','.join([str(data[hd]) for hd in header]))
             cnt += 1
         except Exception as e:
@@ -113,6 +114,7 @@ def main():
         if cnt % 1000 == 0:
             # delta_time = time.time() - start_time 
             logging.info('Captured {} flows, {:.2f} flows/times'.format(cnt, (cnt-pre_cnt)/1000))
+            pre_cnt = cnt
     
 if __name__ == "__main__":
     main()
