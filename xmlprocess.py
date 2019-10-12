@@ -36,7 +36,7 @@ header = ['timestamp',
 def get_local_ips():
     if os.name == 'nt':
         return []
-    cmd = "ifconfig -a|grep inet|grep -v inet6|awk '{print $2}'"
+    cmd = "ifconfig -a|grep 'inet '|awk '{print $2}'"
     ips = subprocess.check_output(cmd, shell=True).decode().split()
     return ips
 
@@ -103,9 +103,11 @@ def main():
                 #         tm.append(int(child.find(tag).text))
                 #     data['when'] = '%d%02d%02d%02d%02d%02d'%tuple(tm)
             if data['protocol'] not in ['tcp', 'udp']: continue
+            ignore = False
             for s in ['127.0.0', '65534']:
-                if s in data['out_link']: continue
-                if s in data['in_link']: continue
+                if s in data['out_link'] or s in data['in_link']: 
+                    ignore = True
+            if ignore: continue
             print(','.join([str(data[hd]) for hd in header]))
             cnt += 1
         except Exception as e:
