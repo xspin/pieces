@@ -5,7 +5,7 @@ exitimer() {
 
 usage() {
     printf """Usage: `basename $0` [OPTION] [DEST] [PORT]
-Collect the data of pinging a tcp port.
+Collect the data of pinging a host via tcp or icmp.
   -h\t print this help.
   -i\t time interval (sec) [default 60].
   -b\t run in background.
@@ -19,7 +19,7 @@ INTERVAL=60
 OUTPUT='log_pingtcp.csv'
 BKG=false
 ARGS="$*"
-while getopts 'hi:bfp:' OPT; do
+while getopts 'hi:bo:fp:' OPT; do
     case $OPT in
         h) usage; exit;;
         i) INTERVAL="$OPTARG";;
@@ -42,7 +42,6 @@ elif [ -z "$FLAG" ]; then
     # echo "Excute: $0 -f $ARGS"
     LOGFILE='/tmp/pingtcp.log'
     echo "Redirect output to $LOGFILE"
-    echo "Save data to $OUTPUT"
     nohup bash -c "$0 -f $ARGS" &>$LOGFILE &
     sleep 1
     tail $LOGFILE
