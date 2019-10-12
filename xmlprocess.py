@@ -114,8 +114,8 @@ def main():
             logging.warning('Error: {}'.format(row))
             logging.warning(e)
         if cnt % 1000 == 0:
-            # delta_time = time.time() - start_time 
-            logging.info('Captured {} flows, {:.2f} flows/times'.format(cnt, (cnt-pre_cnt)/1000))
+            delta_time = time.time() - start_time 
+            logging.info('Captured {} flows, {:.2f} flows/sec'.format(cnt, (cnt-pre_cnt)/delta_time))
             pre_cnt = cnt
     
 if __name__ == "__main__":
