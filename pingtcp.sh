@@ -10,7 +10,7 @@ Collect the data of pinging a host via tcp or icmp.
   -i\t time interval (sec) [default 60].
   -b\t run in background.
   -o\t output path when running in background [deftaul log_pingtcp.csv].
-  -p\t TCP or ICMP ping [default TCP]
+  -p\t TCP or ICMP ping [default TCP].
 """
 }
 
