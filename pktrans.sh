@@ -102,6 +102,8 @@ while true; do
     if [ $DTIME -gt 0 ]; then
         log "Waiting for $DTIME min"
         sleep ${DTIME}m
+    else
+        log "Timeout"
     fi
     exitimer
 done

@@ -6,11 +6,12 @@ exitimer() {
 usage() {
     printf """Usage: `basename $0` [OPTION] [DEST] [PORT]
 Collect the data of pinging a host via tcp or icmp.
-  -h\t print this help.
-  -i\t time interval (sec) [default 60].
-  -b\t run in background.
-  -o\t output path when running in background [deftaul log_pingtcp.csv].
-  -p\t TCP or ICMP ping [default TCP].
+  -c count\t Number of echo requests to send in each time [default 10].
+  -b\t\t Run in background.
+  -h\t\t Print this help.
+  -i second\t Time interval (sec) [default 60].
+  -o file\t Output path when running in background [deftaul log_pingtcp.csv].
+  -p protocol\t TCP or ICMP ping [default TCP].
 """
 }
 
@@ -19,7 +20,8 @@ INTERVAL=60
 OUTPUT='log_pingtcp.csv'
 BKG=false
 ARGS="$*"
-while getopts 'hi:bo:fp:' OPT; do
+COUNT=10
+while getopts 'hi:bo:fp:c:' OPT; do
     case $OPT in
         h) usage; exit;;
         i) INTERVAL="$OPTARG";;
@@ -27,6 +29,7 @@ while getopts 'hi:bo:fp:' OPT; do
         b) BKG=true;;
         f) FLAG='run';;
         p) PROTOCOL="$OPTARG";;
+        c) COUNT="$OPTARG";;
         ?) usage; exit;;
     esac
 done
@@ -71,7 +74,6 @@ case "${PROTOCOL,,}" in
         ;;
 esac
 
-COUNT=10
 TCPINGCMD="paping --nocolor -c $COUNT -p $PORT $HOST"
 ICMPINGCMD="ping -c $COUNT $HOST"
 
@@ -97,8 +99,13 @@ case $TYPE in
         echo "Start $PROTOCOL pinging to $HOST:$PORT ..."
         echo $HEADER >> $OUTPUT
         while true; do
+            STIME=`date +%s`
             stat >> $OUTPUT
-            sleep $INTERVAL
+            DTIME=$((`date +%s`-STIME))
+            DT=$((INTERVAL-DTIME))
+            if [ "$DT" -gt 0 ]; then
+                sleep $DT
+            fi
             exitimer
         done
 esac
