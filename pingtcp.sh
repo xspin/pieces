@@ -12,6 +12,7 @@ Collect the data of pinging a host via tcp or icmp.
   -i second\t Time interval (sec) [default 60].
   -o file\t Output path when running in background [deftaul log_pingtcp.csv].
   -p protocol\t TCP or ICMP ping [default TCP].
+  -l port\t Listen on TCP port.
 """
 }
 
@@ -21,7 +22,7 @@ OUTPUT='log_pingtcp.csv'
 BKG=false
 ARGS="$*"
 COUNT=10
-while getopts 'hi:bo:fp:c:' OPT; do
+while getopts 'hi:bo:fp:c:l:' OPT; do
     case $OPT in
         h) usage; exit;;
         i) INTERVAL="$OPTARG";;
@@ -30,12 +31,13 @@ while getopts 'hi:bo:fp:c:' OPT; do
         f) FLAG='run';;
         p) PROTOCOL="$OPTARG";;
         c) COUNT="$OPTARG";;
+        l) PORT="$OPTARG";;
         ?) usage; exit;;
     esac
 done
 shift $(($OPTIND - 1))
 
-if [ -z "$1" ]; then usage;exit; fi
+if [ -z "$1" ] && [ -z "$PORT" ]; then usage; exit; fi
 
 if  ! $BKG ; then 
     OUTPUT='/dev/stdout'; 
@@ -45,17 +47,16 @@ elif [ -z "$FLAG" ]; then
     # echo "Excute: $0 -f $ARGS"
     LOGFILE='/tmp/pingtcp.log'
     echo "Redirect output to $LOGFILE"
-    nohup bash -c "$0 -f $ARGS" &>$LOGFILE &
+    nohup bash -c "$0 -f $ARGS" &>>$LOGFILE &
     sleep 1
-    tail $LOGFILE
+    tail -n 3 $LOGFILE
     exit
 fi
 
 case "${PROTOCOL,,}" in 
     'tcp')
-        HEADER="timestamp,loss,avg,min,max"
-        if [ -z "$2" ]; then
-            PORT=$1
+        # HEADER="timestamp,loss,avg,min,max"
+        if [ -z "$1" ]; then
             TYPE='SERVER'
         else
             HOST=$1
@@ -64,7 +65,6 @@ case "${PROTOCOL,,}" in
         fi
         ;;
     'icmp')
-        HEADER="timestamp,loss,avg,min,max,dev"
         HOST=$1
         TYPE='CLIENT'
         ;;
@@ -74,6 +74,7 @@ case "${PROTOCOL,,}" in
         ;;
 esac
 
+HEADER="timestamp,loss,avg,min,max,dev"
 TCPINGCMD="paping --nocolor -c $COUNT -p $PORT $HOST"
 ICMPINGCMD="ping -c $COUNT $HOST"
 
@@ -81,7 +82,7 @@ stat(){
     if [ "${PROTOCOL,,}" = "tcp" ]; then
         # loss avg min max 
         RAW=`$TCPINGCMD|tail -n 4|sed -e 's/[()%:=,a-zA-Z]//g'` 
-        DATA=`echo $RAW|awk 'BEGIN{OFS=","} {print $4,$7,$5,$6}'`
+        DATA=`echo $RAW|awk 'BEGIN{OFS=","} {print $4,$7,$5,$6,$8}'`
     elif [ "${PROTOCOL,,}" = "icmp" ]; then
         # loss avg min max mdev
         RAW=`$ICMPINGCMD|tail -n 2|sed -e 's/[%=,a-z]//g' -e 's/\// /g'`
@@ -97,15 +98,16 @@ case $TYPE in
         ;;
     'CLIENT')
         echo "Start $PROTOCOL pinging to $HOST:$PORT ..."
-        echo $HEADER >> $OUTPUT
+        echo $HEADER > $OUTPUT
         while true; do
             STIME=`date +%s`
-            stat >> $OUTPUT
+            RST=`stat` 
             DTIME=$((`date +%s`-STIME))
             DT=$((INTERVAL-DTIME))
             if [ "$DT" -gt 0 ]; then
                 sleep $DT
             fi
+            echo "$RST" >> $OUTPUT
             exitimer
         done
 esac
