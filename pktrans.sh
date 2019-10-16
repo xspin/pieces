@@ -15,7 +15,7 @@ printf """Usage: $pn [OPTION] [IP] PORT
 Periodically send/receive data to/from a host.
 
   -h\t print this help.
-  -d\t data size to transfer (MB) [default 200].
+  -d\t data size to transfer (k,M,G) [default 100M].
   -t\t transfer timeout (minutes) [default 40].
   -p\t period (minutes) [default 60].
   -s\t start time (0~PERIOD) [default 0].
@@ -29,7 +29,7 @@ Example:
 """
 }
 
-DATASIZE=200 #MB
+DATASIZE=100M #MB
 TIMEOUT=40 #min
 PERIOD=60 # 1~60 min
 START=0
@@ -51,7 +51,8 @@ done
 shift $(($OPTIND - 1))
 
 
-dd_cmd="dd if=/dev/urandom bs=10M count=$((DATASIZE/10))"
+dd_cmd="dd if=/dev/urandom bs=$DATASIZE count=1"
+
 
 if [ -z "$2" ]; then
     PORT=$1
@@ -74,7 +75,7 @@ if [ -z "$PORT" ]; then
     exit
 fi
 
-log "DATASIZE: $((DATASIZE))MB, TIMEOUT: ${TIMEOUT}min, PERIOD: ${PERIOD}min, START: ${START}min, Args: $*"
+log "DATASIZE: $((DATASIZE)), TIMEOUT: ${TIMEOUT}min, PERIOD: ${PERIOD}min, START: ${START}min, Args: $*"
 if [ ! -z "$FILE" ]; then log "OUTPUT: $FILE"; fi
 if [ ! -z "$SEED" ]; then log "SEED: $SEED"; fi
 
