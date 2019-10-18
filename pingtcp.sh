@@ -20,15 +20,15 @@ PROTOCOL='tcp'
 INTERVAL=60
 OUTPUT='log_pingtcp.csv'
 BKG=false
-ARGS="$*"
+ARGS=`echo "$*" | sed "s/-b//g"`
 COUNT=10
-while getopts 'hi:bo:fp:c:l:' OPT; do
+while getopts 'hi:bo:p:c:l:' OPT; do
     case $OPT in
         h) usage; exit;;
         i) INTERVAL="$OPTARG";;
         o) OUTPUT="$OPTARG";;
         b) BKG=true;;
-        f) FLAG='run';;
+        # f) FLAG='run';;
         p) PROTOCOL="$OPTARG";;
         c) COUNT="$OPTARG";;
         l) PORT="$OPTARG";;
@@ -41,13 +41,13 @@ if [ -z "$1" ] && [ -z "$PORT" ]; then usage; exit; fi
 
 if  ! $BKG ; then 
     OUTPUT='/dev/stdout'; 
-elif [ -z "$FLAG" ]; then
+else
     echo 'Run in background ...'
     # echo "Save data to $OUTPUT"
     # echo "Excute: $0 -f $ARGS"
     LOGFILE='/tmp/pingtcp.log'
     echo "Redirect output to $LOGFILE"
-    nohup bash -c "$0 -f $ARGS" &>>$LOGFILE &
+    nohup bash -c "$0 $ARGS" &>>$LOGFILE &
     sleep 1
     tail -n 3 $LOGFILE
     exit
