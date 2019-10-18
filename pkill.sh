@@ -8,7 +8,7 @@ kill_all() {
     done
     PSDATA=`ps aux | grep "$PROG" | grep -v grep | grep -v kill`
     if [ ! -z "$PSDATA" ]; then
-    echo '------------------------------------------'
+    echo '-------------------Fail----------------------'
         printf "$PSDATA" | grep --color=auto "$PROG" 
     fi
 
