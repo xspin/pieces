@@ -1,5 +1,5 @@
 #!/bin/bash
-VER=0.1.3
+VER=0.2.0
 
 log() {
     echo `date +[%Y-%m-%d_%H:%M:%S]` "($TYPE)" $*
@@ -11,15 +11,18 @@ exitimer() {
 
 usage() {
 pn=`basename $0`
-printf """Usage: $pn [OPTION] [IP] PORT 
+printf """pktrans v$VER (C) 2019 xnipse@gmail.com
+Usage: $pn [OPTION] [IP] PORT 
 Periodically send/receive data to/from a host.
 
   -h\t print this help.
+  -b\t run in background.
   -d\t data size to transfer (k,M,G) [default 100M].
   -t\t transfer timeout (minutes) [default 40].
   -p\t period (minutes) [default 60].
   -s\t start time (0~PERIOD) [default 0].
-  -o\t store data to FILE [default /dev/null].
+  -o\t store transfered data to FILE [default /dev/null].
+  -O\t log path when running in background [deftaul /tmp/pktrans.log].
   -r\t random start time in each period with a specified SEED.
   -v\t version.
 
@@ -34,8 +37,9 @@ TIMEOUT=40 #min
 PERIOD=60 # 1~60 min
 START=0
 FILE='/dev/null'
-
-while getopts 'hd:t:p:s:o:r:v' OPT; do
+BKG=false
+ARGS=`echo "$*" | sed "s/-b//g"`
+while getopts 'hd:t:p:s:o:O:r:vb' OPT; do
     case $OPT in
         h) usage; exit;;
         d) DATASIZE="$OPTARG";;
@@ -43,13 +47,23 @@ while getopts 'hd:t:p:s:o:r:v' OPT; do
         p) PERIOD="$OPTARG";;
         s) START="$OPTARG";;
         o) FILE="$OPTARG";;
+        O) LOGFILE="$OPTARG";;
         r) SEED="$OPTARG";;
+        b) BKG=true;;
         v) echo "$VER"; exit;;
         ?) usage; exit;;
     esac
 done
 shift $(($OPTIND - 1))
 
+if $BKG ; then 
+    echo 'Run in background ...'
+    if [ -z "$LOGFILE" ]; then LOGFILE='/tmp/pktrans.log'; fi
+    echo "Redirect output to $LOGFILE"
+    # echo "$0 $ARGS"
+    nohup bash -c "$0 $ARGS" &> $LOGFILE &
+    exit
+fi
 
 dd_cmd="dd if=/dev/urandom bs=$DATASIZE count=1"
 
@@ -63,7 +77,7 @@ else
     IP=$1
     PORT=$2
     # cmd="timeout ${TIMEOUT}m nc $IP $PORT > /tmp/pktrans_recv.data"
-    cmd="timeout ${TIMEOUT}m wget $IP:$PORT -q -O $FILE -o /dev/null"
+    cmd="timeout ${TIMEOUT}m wget $IP:$PORT -O $FILE -o /dev/stdout|grep saved"
     delta=1
     TYPE='RECEIVER'
 fi
@@ -75,7 +89,7 @@ if [ -z "$PORT" ]; then
     exit
 fi
 
-log "DATASIZE: $((DATASIZE)), TIMEOUT: ${TIMEOUT}min, PERIOD: ${PERIOD}min, START: ${START}min, Args: $*"
+log "DATASIZE: $DATASIZE, TIMEOUT: ${TIMEOUT}min, PERIOD: ${PERIOD}min, START: ${START}min, Args: $*"
 if [ ! -z "$FILE" ]; then log "OUTPUT: $FILE"; fi
 if [ ! -z "$SEED" ]; then log "SEED: $SEED"; fi
 
@@ -96,7 +110,7 @@ while true; do
         log "Excute: $cmd"
         bash -c "$cmd"
         ETIME=`date +%s`
-        if [ $((ETIME-STIME)) -gt 30 ]; then break; else [ $i -eq 2 ] || log 'Retry'; sleep 3; fi
+        # if [ $((ETIME-STIME)) -gt 3 ]; then break; else [ $i -eq 2 ] || log 'Retry'; sleep 3; fi
     done
     ETIME=`date +%s`
     DTIME=$((TIMEOUT-(ETIME-STIME)/60))
