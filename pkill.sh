@@ -3,8 +3,8 @@
 kill_all() {
     for pid in `printf "$PSDATA" | awk '{print $2}'`
     do
-        echo "kill Pid $pid"
-        kill $pid || kill -9 $pid
+        echo "kill $1 Pid $pid"
+        kill $1 $pid 
     done
     PSDATA=`ps aux | grep "$PROG" | grep -v grep | grep -v kill`
     if [ ! -z "$PSDATA" ]; then
@@ -16,7 +16,7 @@ kill_all() {
 
 PROG=$1
 
-if [ -z "$1" ]; then echo "Usage: kill.sh [Program_Name]"; exit; fi
+if [ -z "$1" ]; then echo "Usage: `basename $0` [Program_Name]"; exit; fi
 
 PSDATA=`ps aux | grep "$1" | grep -v grep | grep -v kill`
 
@@ -33,7 +33,7 @@ fi
 
 read -p "Do you want to kill all processes (y/n)? " yn
 case $yn in
-    [Yy]* ) kill_all; exit;;
+    [Yy]* ) kill_all $2; exit;;
     [Nn]* ) exit;;
     * ) echo "Please answer yes or no.";;
 esac
