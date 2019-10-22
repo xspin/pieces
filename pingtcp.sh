@@ -5,7 +5,7 @@ exitimer() {
 
 usage() {
     printf """Usage: `basename $0` [OPTION] [DEST] [PORT]
-Collect the data of pinging a host via tcp or icmp.
+Collect the data of pinging a host via TCP or ICMP.
   -c count\t Number of echo requests to send in each time [default 10].
   -b\t\t Run in background.
   -h\t\t Print this help.
@@ -48,8 +48,8 @@ else
     LOGFILE='/tmp/pingtcp.log'
     echo "Redirect output to $LOGFILE"
     nohup bash -c "$0 $ARGS" &>>$LOGFILE &
-    sleep 1
-    tail -n 3 $LOGFILE
+    # sleep 1
+    # tail -n 3 $LOGFILE
     exit
 fi
 
