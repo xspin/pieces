@@ -113,10 +113,11 @@ def main(protocols, blacklist):
         except Exception as e:
             logging.warning('Error: {}'.format(row))
             logging.warning(e)
-        if cnt % 1000 == 0:
+        n_stat = 1000
+        if cnt % n_stat == 0:
             delta_time = time.time() - start_time 
-            logging.info('Captured {} flows, {:.2f} flows/sec'.format(cnt, (cnt-pre_cnt)/delta_time))
-            pre_cnt = cnt
+            logging.info('Captured {} flows, {:.2f} flows/sec'.format(cnt, n_stat/delta_time))
+            start_time = time.time()
     
 if __name__ == "__main__":
     protocols = ['tcp']
