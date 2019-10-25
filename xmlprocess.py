@@ -58,7 +58,7 @@ def get_count(meta):
             rts = counter.find('retrans').text
     return pks, bts, rts
 
-def main():
+def main(protocols, blacklist):
     logging.info('Start Processing ...')
     print(','.join(header))
     ips = get_local_ips()
@@ -102,9 +102,9 @@ def main():
                 #     for tag in ['year', 'month', 'day', 'hour', 'min', 'sec']:
                 #         tm.append(int(child.find(tag).text))
                 #     data['when'] = '%d%02d%02d%02d%02d%02d'%tuple(tm)
-            if data['protocol'] not in ['tcp', 'udp']: continue
+            if data['protocol'] not in protocols: continue
             ignore = False
-            for s in ['127.0.0', '65534']:
+            for s in blacklist:
                 if s in data['out_link'] or s in data['in_link']: 
                     ignore = True
             if ignore: continue
@@ -119,4 +119,6 @@ def main():
             pre_cnt = cnt
     
 if __name__ == "__main__":
-    main()
+    protocols = ['tcp']
+    blacklist = ['127.0.0']
+    main(protocols, blacklist)
