@@ -10,7 +10,7 @@ Collect the data of pinging a host via TCP or ICMP.
   -b\t\t Run in background.
   -h\t\t Print this help.
   -i second\t Time interval (sec) [default 60].
-  -o file\t Output path when running in background [deftaul log_pingtcp.csv].
+  -o file\t Output path when running in background [deftaul log_ping.csv].
   -p protocol\t TCP or ICMP ping [default TCP].
   -l port\t Listen on TCP port.
 """
@@ -18,7 +18,7 @@ Collect the data of pinging a host via TCP or ICMP.
 
 PROTOCOL='tcp'
 INTERVAL=60
-OUTPUT='log_pingtcp.csv'
+OUTPUT='log_ping.csv'
 BKG=false
 ARGS=`echo "$*" | sed "s/-b//g"`
 COUNT=10
@@ -45,9 +45,10 @@ else
     echo 'Run in background ...'
     # echo "Save data to $OUTPUT"
     # echo "Excute: $0 -f $ARGS"
-    LOGFILE='/tmp/pingtcp.log'
+    # LOGFILE='/tmp/pingtcp.log'
+    LOGFILE=$OUTPUT
     echo "Redirect output to $LOGFILE"
-    nohup bash -c "$0 $ARGS" &>>$LOGFILE &
+    nohup bash -c "$0 $ARGS" > $LOGFILE &
     # sleep 1
     # tail -n 3 $LOGFILE
     exit
