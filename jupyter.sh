@@ -1,6 +1,8 @@
 #!/bin/bash
 
 PIP=pip
+# jupyter_dir=$(jupyter --data-dir)
+jupyter_dir='/usr/local/share/jupyter'
 
 echo "Install nbextensions ..."
 $PIP install jupyter_contrib_nbextensions
@@ -11,7 +13,7 @@ $PIP install jupyterthemes
 jt -t onedork -f roboto -fs 10 -nfs 9  -vim -T
 
 echo "Install vim_binding ..."
-cd $(jupyter --data-dir)/nbextensions
+cd $jupyter_dir/nbextensions
 git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding
 
 echo "Enable extensions ..."
