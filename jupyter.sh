@@ -24,5 +24,5 @@ jupyter nbextension enable toggle_all_line_numbers/main
 #jupyter nbextension enable code_prettify/code_prettify
 
 echo "Restart jupyter ..."
-pid=`ps x|grep jupyter-notebook|grep -v grep|awk '{print $1}'`
-nohup bash -c "kill $pid && /usr/bin/start_jupyter.sh" > jupyter.log &
+for pid in `ps x|grep jupyter-notebook|grep -v grep|awk '{print $1}'`
+nohup bash -c "kill $pid; /usr/bin/start_jupyter.sh" > /tmp/jupyter.log &
