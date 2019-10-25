@@ -10,7 +10,7 @@ jupyter contrib nbextension install
 
 echo "Install jupyterthemes ..."
 $PIP install jupyterthemes
-jt -t onedork -f roboto -fs 10 -nfs 9  -vim -T
+jt -t onedork -f roboto -fs 10 -nfs 9 -vim -T
 
 echo "Install vim_binding ..."
 cd $jupyter_dir/nbextensions
@@ -25,4 +25,4 @@ jupyter nbextension enable toggle_all_line_numbers/main
 
 echo "Restart jupyter ..."
 pid=`ps x|grep jupyter-notebook|grep -v grep|awk '{print $1}'`
-nohup bash -c "kill $pid && /usr/bin/start_jupyter.sh" > start_jupyter.log &
+nohup bash -c "kill $pid && /usr/bin/start_jupyter.sh" > jupyter.log &
